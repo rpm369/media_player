@@ -6,6 +6,7 @@ class VideoModel {
   final Uint8List? thumbnail;
   final bool isFavorite;
   final int length;
+  final bool hasFinished;
   final int resumeTimeStamp;
   final DateTime? lastPlayedAt;
 
@@ -13,6 +14,7 @@ class VideoModel {
     this.id,
     this.lastPlayedAt,
     this.thumbnail,
+    required this.hasFinished,
     required this.isFavorite,
     required this.filePath,
     required this.length,
@@ -26,6 +28,7 @@ class VideoModel {
       'thumbnail': this.thumbnail,
       'length': this.length,
       'isFavorite': (this.isFavorite) ? 1 : 0,
+      'hasFinished': (this.hasFinished) ? 1 : 0,
       'resumeTimeStamp': this.resumeTimeStamp,
       'lastPlayedAt': this.lastPlayedAt?.millisecondsSinceEpoch,
     };
@@ -37,8 +40,9 @@ class VideoModel {
       lastPlayedAt: (json['lastPlayedAt'] != null)
           ? DateTime.fromMillisecondsSinceEpoch(json['lastPlayedAt'])
           : null,
+      hasFinished: (json['hasFinished'] == 1),
       filePath: json['filePath'],
-      isFavorite: (json['isFavorite'] == 1) ? true : false,
+      isFavorite: (json['isFavorite'] == 1),
       thumbnail: json['thumbnail'],
       length: json['length'],
       resumeTimeStamp: json['resumeTimeStamp'],
@@ -50,6 +54,7 @@ class VideoModel {
     required DateTime? lastPlayedAt,
     bool? isFavorite,
     String? filePath,
+    bool? hasFinished,
     required Uint8List? thumbnail,
     int? length,
     int? resumeTimeStamp,
@@ -59,6 +64,7 @@ class VideoModel {
       isFavorite: isFavorite ?? this.isFavorite,
       lastPlayedAt: lastPlayedAt,
       filePath: filePath ?? this.filePath,
+      hasFinished: hasFinished ?? this.hasFinished,
       thumbnail: thumbnail,
       length: length ?? this.length,
       resumeTimeStamp: resumeTimeStamp ?? this.resumeTimeStamp,
