@@ -1,5 +1,10 @@
 import 'dart:typed_data';
 
+import 'package:media_player/DataModels/AudioInfoModel.dart';
+import 'package:media_player/DataModels/VideoInfoModel.dart';
+import 'package:media_player/DomainModels/AudioInfo.dart';
+import 'package:media_player/DomainModels/Video.dart';
+
 class VideoModel {
   final int? id;
   final String filePath;
@@ -34,6 +39,24 @@ class VideoModel {
     };
   }
 
+  Video toVideo({
+    required AudioInfoModel audioInfoModel,
+    required VideoInfoModel videoInfoModel,
+  }) {
+    return Video(
+      id: this.id,
+      audioInfo: audioInfoModel.toAudioInfo(),
+      videoInfo: videoInfoModel.toVideoInfo(),
+      lastPlayedAt: this.lastPlayedAt,
+      thumbnail: this.thumbnail,
+      hasFinished: this.hasFinished,
+      isFavorite: this.isFavorite,
+      filePath: this.filePath,
+      length: Duration(milliseconds: this.length),
+      resumeTimeStamp: Duration(milliseconds: this.resumeTimeStamp),
+    );
+  }
+
   factory VideoModel.fromJson({required Map<String, dynamic> json}) {
     return VideoModel(
       id: json['id'],
@@ -46,6 +69,22 @@ class VideoModel {
       thumbnail: json['thumbnail'],
       length: json['length'],
       resumeTimeStamp: json['resumeTimeStamp'],
+    );
+  }
+
+  factory VideoModel.fromVideo({required Video video}) {
+    int videoLength = video.length.inMilliseconds;
+    int resumeTimeStamp = video.resumeTimeStamp.inMilliseconds;
+
+    return VideoModel(
+      id: video.id,
+      lastPlayedAt: video.lastPlayedAt,
+      thumbnail: video.thumbnail,
+      hasFinished: video.hasFinished,
+      isFavorite: video.isFavorite,
+      filePath: video.filePath,
+      length: videoLength,
+      resumeTimeStamp: resumeTimeStamp,
     );
   }
 

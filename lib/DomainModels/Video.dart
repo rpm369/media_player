@@ -9,16 +9,18 @@ class Video {
   final bool isFavorite;
   final Duration length;
   final Duration resumeTimeStamp;
+  final bool hasFinished;
   final DateTime? lastPlayedAt;
-  final VideoInfo? videoInfo;
-  final AudioInfo? audioTracks;
+  final VideoInfo videoInfo;
+  final AudioInfo audioInfo;
 
   const Video({
     this.id,
     this.lastPlayedAt,
     this.thumbnail,
-    this.videoInfo,
-    this.audioTracks,
+    required this.audioInfo,
+    required this.videoInfo,
+    required this.hasFinished,
     required this.isFavorite,
     required this.filePath,
     required this.length,
@@ -29,6 +31,7 @@ class Video {
     required int? id,
     required DateTime? lastPlayedAt,
     required Uint8List? thumbnail,
+    bool? hasFinished,
     VideoInfo? videoInfo,
     AudioInfo? audioInfo,
     bool? isFavorite,
@@ -38,10 +41,11 @@ class Video {
   }) {
     return Video(
       id: id,
+      audioInfo: audioInfo ?? this.audioInfo,
+      videoInfo: videoInfo ?? this.videoInfo,
       lastPlayedAt: lastPlayedAt,
       thumbnail: thumbnail,
-      videoInfo: videoInfo ?? this.videoInfo,
-      audioTracks: audioTracks ?? this.audioTracks,
+      hasFinished: hasFinished ?? this.hasFinished,
       isFavorite: isFavorite ?? this.isFavorite,
       filePath: filePath ?? this.filePath,
       length: length ?? this.length,

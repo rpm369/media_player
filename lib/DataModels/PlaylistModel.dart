@@ -1,3 +1,7 @@
+import 'package:media_player/DataModels/AudioModel.dart';
+import 'package:media_player/DataModels/VideoModel.dart';
+import 'package:media_player/DomainModels/Playlist.dart';
+
 class PlaylistModel {
   final int? id;
   final bool isFavorite;
@@ -11,6 +15,18 @@ class PlaylistModel {
       'name': this.name,
       'isFavorite': (this.isFavorite) ? 1 : 0,
     };
+  }
+
+  Playlist toPlaylist() {
+    return Playlist(id: this.id, name: this.name, isFavorite: this.isFavorite);
+  }
+
+  factory PlaylistModel.fromPlaylist({required Playlist playlist}) {
+    return PlaylistModel(
+      id: playlist.id,
+      name: playlist.name,
+      isFavorite: playlist.isFavorite,
+    );
   }
 
   factory PlaylistModel.fromJson({required Map<String, dynamic> json}) {

@@ -1,3 +1,5 @@
+import 'package:media_player/DomainModels/VideoInfo.dart';
+
 class VideoInfoModel {
   final int? id;
   final int? videoId;
@@ -24,6 +26,30 @@ class VideoInfoModel {
       'resolution': this.resolution,
       'frameRate': this.frameRate,
     };
+  }
+
+  VideoInfo toVideoInfo() {
+    return VideoInfo(
+      id: this.id,
+      codec: this.codec,
+      language: this.language,
+      resolution: this.resolution,
+      frameRate: this.frameRate,
+    );
+  }
+
+  factory VideoInfoModel.fromVideoInfo({
+    required VideoInfo videoInfo,
+    required int videoId,
+  }) {
+    return VideoInfoModel(
+      id: videoInfo.id,
+      videoId: videoId,
+      codec: videoInfo.codec,
+      language: videoInfo.language,
+      resolution: videoInfo.resolution,
+      frameRate: videoInfo.frameRate,
+    );
   }
 
   factory VideoInfoModel.fromJson({required Map<String, dynamic> json}) {

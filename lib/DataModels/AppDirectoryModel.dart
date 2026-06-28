@@ -1,3 +1,5 @@
+import 'package:media_player/DomainModels/AppDirectory.dart';
+
 class AppDirectoryModel {
   final int? id;
   final String directoryPath;
@@ -6,6 +8,19 @@ class AppDirectoryModel {
 
   Map<String, dynamic> toJson() {
     return {'id': this.id, 'directoryPath': this.directoryPath};
+  }
+
+  AppDirectory toAppDirectory() {
+    return AppDirectory(id: this.id, directoryPath: directoryPath);
+  }
+
+  factory AppDirectoryModel.fromAppDirectory({
+    required AppDirectory appDirectory,
+  }) {
+    return AppDirectoryModel(
+      id: appDirectory.id,
+      directoryPath: appDirectory.directoryPath,
+    );
   }
 
   factory AppDirectoryModel.fromJson({required Map<String, dynamic> json}) {

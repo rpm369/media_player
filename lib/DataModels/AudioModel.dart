@@ -1,5 +1,8 @@
 import 'dart:typed_data';
 
+import 'package:media_player/DomainModels/Audio.dart';
+import 'package:media_player/DomainModels/AudioInfo.dart';
+
 class AudioModel {
   final int? id;
   final String filePath;
@@ -29,6 +32,34 @@ class AudioModel {
       'thumbnail': this.thumbnail,
       'lastPlayedAt': this.lastPlayedAt?.millisecondsSinceEpoch,
     };
+  }
+
+  Audio toAudio({required AudioInfo audioInfo}) {
+    Duration audioLength = Duration(milliseconds: this.length);
+    Duration resumeTimeStamp = Duration(milliseconds: this.resumeTimeStamp);
+
+    return Audio(
+      id: this.id,
+      audioInfo: audioInfo,
+      lastPlayedAt: this.lastPlayedAt,
+      thumbnail: this.thumbnail,
+      filePath: this.filePath,
+      length: audioLength,
+      resumeTimeStamp: resumeTimeStamp,
+      isFavorite: this.isFavorite,
+    );
+  }
+
+  factory AudioModel.fromAudio({required Audio audio}) {
+    return AudioModel(
+      id: audio.id,
+      lastPlayedAt: audio.lastPlayedAt,
+      thumbnail: audio.thumbnail,
+      filePath: audio.filePath,
+      length: audio.length.inMilliseconds,
+      resumeTimeStamp: audio.resumeTimeStamp.inMilliseconds,
+      isFavorite: audio.isFavorite,
+    );
   }
 
   factory AudioModel.fromJson({required Map<String, dynamic> json}) {

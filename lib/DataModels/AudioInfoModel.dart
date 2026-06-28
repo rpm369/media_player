@@ -1,3 +1,5 @@
+import 'package:media_player/DomainModels/AudioInfo.dart';
+
 class AudioInfoModel {
   final int? id;
   final int? videoId;
@@ -31,6 +33,38 @@ class AudioInfoModel {
       'channelCount': this.channelCount,
       'sampleRate': this.sampleRate,
     };
+  }
+
+  AudioInfo toAudioInfo() {
+    return AudioInfo(
+      id: this.id,
+      bitRate: this.bitRate,
+      codec: this.codec,
+      language: this.language,
+      channelCount: this.channelCount,
+      sampleRate: this.sampleRate,
+    );
+  }
+
+  factory AudioInfoModel.fromAudioInfo({
+    required AudioInfo audioInfo,
+    int? audioId,
+    int? videoId,
+  }) {
+    if ((audioId != null && videoId != null ||
+        audioId == null && videoId == null))
+      throw Exception("Either VideId or AudioId could be null at a time.");
+
+    return AudioInfoModel(
+      id: audioInfo.id,
+      audioId: audioId,
+      videoId: videoId,
+      bitRate: audioInfo.bitRate,
+      codec: audioInfo.codec,
+      language: audioInfo.language,
+      channelCount: audioInfo.channelCount,
+      sampleRate: audioInfo.sampleRate,
+    );
   }
 
   factory AudioInfoModel.fromJson({required Map<String, dynamic> json}) {

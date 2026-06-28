@@ -1,6 +1,6 @@
 abstract class SystemRepository {
-  Future<String> getLastVisitedPage();
+  String getLastVisitedPage();
   Future<void> setLastVisitedPage({required String pageRoute});
-  Future<String> getLastActiveAudioTab();
+  String getLastActiveAudioTab();
   Future<void> setLastActiveAudioTab({required String tabName});
 }
