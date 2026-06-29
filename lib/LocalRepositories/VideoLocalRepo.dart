@@ -32,7 +32,12 @@ class VideoLocalRepo implements VideoRepository {
   }
 
   @override
-  Future<void> deleteVideoMeta({required int videoId}) async {
+  Future<void> deleteVideoMetaByPath({required String path}) async {
+    await _db.delete('Video', where: 'filePath = ?', whereArgs: [path]);
+  }
+
+  @override
+  Future<void> deleteVideoMetaById({required int videoId}) async {
     await _db.delete('Video', where: 'id = ?', whereArgs: [videoId]);
   }
 
@@ -80,11 +85,14 @@ class VideoLocalRepo implements VideoRepository {
 
   @override
   Future<List<Video>> getAllVideosInPlaylist({required int playlistId}) async {
-    final List<Map<String, dynamic>> videoMaps = await _db.rawQuery('''
+    final List<Map<String, dynamic>> videoMaps = await _db.rawQuery(
+      '''
       SELECT Video.* FROM Video
       INNER JOIN PlaylistVideo ON Video.id = PlaylistVideo.videoId
       WHERE PlaylistVideo.playlistId = ?
-    ''', [playlistId]);
+    ''',
+      [playlistId],
+    );
 
     final List<Future<Video?>> futures = videoMaps.map((videoMap) async {
       final videoModel = VideoModel.fromJson(json: videoMap);
@@ -163,5 +171,20 @@ class VideoLocalRepo implements VideoRepository {
         whereArgs: [videoId],
       );
     });
+  }
+
+  @override
+  Future<void> addVideoToPlaylist({
+    required int videoId,
+    required int playlistId,
+  }) async {
+    await _db.insert(
+      'PlaylistVideo',
+      {
+        'playlistId': playlistId,
+        'videoId': videoId,
+      },
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
   }
 }
