@@ -25,4 +25,17 @@ class PlaylistLocalRepo implements PlaylistRepository {
         .map((map) => PlaylistModel.fromJson(json: map).toPlaylist())
         .toList();
   }
+
+  @override
+  Future<void> updatePlaylist({required Playlist playlist}) async {
+    PlaylistModel playlistModel = PlaylistModel.fromPlaylist(
+      playlist: playlist,
+    );
+    await _db.update(
+      'Playlist',
+      playlistModel.toJson(),
+      where: "id = ?",
+      whereArgs: [playlistModel.id!],
+    );
+  }
 }

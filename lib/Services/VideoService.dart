@@ -14,6 +14,10 @@ class VideoService {
   final VideoRepository _repo;
   const VideoService({required this._repo});
 
+  Future<List<Video>> getAllVideoForPlaylist({required int playlistId}) async {
+    return await _repo.getAllVideosInPlaylist(playlistId: playlistId);
+  }
+
   Future<List<Video>> loadVideos() async {
     List<Video> allVideoMeta = await _repo.getAllVideosMeta();
 
@@ -139,6 +143,15 @@ class VideoService {
       filePath: newPath,
     );
 
+    await _repo.updateVideoMeta(video: video);
+  }
+
+  Future<void> updateLastPlayedDate({required Video video}) async {
+    video = video.copyWith(
+      id: video.id,
+      lastPlayedAt: DateTime.now(),
+      thumbnail: video.thumbnail,
+    );
     await _repo.updateVideoMeta(video: video);
   }
 }

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:media_player/DomainModels/Audio.dart';
 import 'package:media_player/DomainModels/AudioInfo.dart';
 import 'package:media_player/DomainModels/Playlist.dart';
+import 'package:media_player/DomainModels/Video.dart';
 import 'package:media_player/Repos/AudioRepo.dart';
 import 'package:media_player/Utils/FileTypeUtil.dart';
 import 'package:media_player/Utils/MediaMetaUtils.dart';
@@ -12,6 +13,10 @@ import 'package:media_player/Utils/PermissionHandler.dart';
 class AudioService {
   AudioRepository _repo;
   AudioService({required this._repo});
+
+  Future<List<Audio>> getAllAudioForPlaylist({required int playlistId}) async {
+    return await _repo.getAllAudioInPlaylist(playlistId: playlistId);
+  }
 
   Future<List<Audio>> loadAllAudio() async {
     List<Audio> allAudioMeta = await _repo.getAllAudioMeta();
@@ -109,6 +114,15 @@ class AudioService {
       lastPlayedAt: audio.lastPlayedAt,
       thumbnail: audio.thumbnail,
       filePath: newPath,
+    );
+    await _repo.updateAudioMeta(audio: audio);
+  }
+
+  Future<void> updateLastPlayedDate({required Audio audio}) async {
+    audio = audio.copyWith(
+      id: audio.id,
+      lastPlayedAt: DateTime.now(),
+      thumbnail: audio.thumbnail,
     );
     await _repo.updateAudioMeta(audio: audio);
   }
