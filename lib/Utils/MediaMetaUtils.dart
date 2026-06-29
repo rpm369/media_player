@@ -1,10 +1,14 @@
 import 'dart:io';
 
+import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_new/ffprobe_kit.dart';
+import 'package:ffmpeg_kit_flutter_new/return_code.dart';
 import 'package:ffmpeg_kit_flutter_new/stream_information.dart';
 import 'package:flutter/services.dart';
+import 'package:media_player/DomainModels/Audio.dart';
 import 'package:media_player/DomainModels/AudioInfo.dart';
 import 'package:media_player/DomainModels/VideoInfo.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:path/path.dart' as p;
 
@@ -33,6 +37,37 @@ class MediaMetaUtils {
       quality: 90,
     );
     return thumbnail;
+  }
+
+  static Future<Uint8List?> extractAudioAlbumCover({
+    required String path,
+  }) async {
+    // Write the cover to a temp file since FFmpegKit can't return bytes directly
+    final tempDir = await getTemporaryDirectory();
+    final outputPath =
+        '${tempDir.path}/cover_${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+    final session = await FFmpegKit.execute(
+      '-i "$path" -an -vcodec copy -y "$outputPath"',
+    );
+
+    final returnCode = await session.getReturnCode();
+
+    if (!ReturnCode.isSuccess(returnCode)) {
+      // File has no embedded cover art, or the format doesn't support it
+      return null;
+    }
+
+    final coverFile = File(outputPath);
+
+    if (!await coverFile.exists()) return null;
+
+    final bytes = await coverFile.readAsBytes();
+
+    // Clean up the temp file
+    await coverFile.delete();
+
+    return bytes.isEmpty ? null : bytes;
   }
 
   static Future<Duration> getMediaLength({required String path}) async {

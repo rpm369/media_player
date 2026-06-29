@@ -28,8 +28,13 @@ class AudioLocalRepo implements AudioRepository {
   }
 
   @override
-  Future<void> deleteAudioMeta({required int id}) async {
+  Future<void> deleteAudioMetaById({required int id}) async {
     await _db.delete('Audio', where: 'id = ?', whereArgs: [id]);
+  }
+
+  @override
+  Future<void> deleteAudioMetaByPath({required String path}) async {
+    await _db.delete('Audio', where: 'filePath = ?', whereArgs: [path]);
   }
 
   @override
@@ -62,11 +67,14 @@ class AudioLocalRepo implements AudioRepository {
 
   @override
   Future<List<Audio>> getAllAudioInPlaylist({required int playlistId}) async {
-    final List<Map<String, dynamic>> audioMaps = await _db.rawQuery('''
+    final List<Map<String, dynamic>> audioMaps = await _db.rawQuery(
+      '''
       SELECT Audio.* FROM Audio
       INNER JOIN PlaylistAudio ON Audio.id = PlaylistAudio.audioId
       WHERE PlaylistAudio.playlistId = ?
-    ''', [playlistId]);
+    ''',
+      [playlistId],
+    );
 
     final List<Future<Audio?>> futures = audioMaps.map((audioMap) async {
       final audioModel = AudioModel.fromJson(json: audioMap);
@@ -122,5 +130,16 @@ class AudioLocalRepo implements AudioRepository {
         );
       }
     });
+  }
+
+  @override
+  Future<void> addAudioToPlaylist({
+    required int audioId,
+    required int playlistId,
+  }) async {
+    await _db.insert('PlaylistAudio', {
+      'playlistId': playlistId,
+      'audioId': audioId,
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
   }
 }
