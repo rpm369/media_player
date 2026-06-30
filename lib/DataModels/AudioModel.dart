@@ -7,6 +7,7 @@ class AudioModel {
   final int? id;
   final String filePath;
   final int length;
+  final int sizeInBytes;
   final int resumeTimeStamp;
   final DateTime? lastPlayedAt;
   final bool isFavorite;
@@ -16,6 +17,7 @@ class AudioModel {
     this.id,
     this.lastPlayedAt,
     this.thumbnail,
+    required this.sizeInBytes,
     required this.filePath,
     required this.length,
     required this.resumeTimeStamp,
@@ -27,6 +29,7 @@ class AudioModel {
       'id': this.id,
       'filePath': this.filePath,
       'length': this.length,
+      'sizeInBytes': this.sizeInBytes,
       'resumeTimeStamp': this.resumeTimeStamp,
       'isFavorite': (this.isFavorite) ? 1 : 0,
       'thumbnail': this.thumbnail,
@@ -43,6 +46,7 @@ class AudioModel {
       audioInfo: audioInfo,
       lastPlayedAt: this.lastPlayedAt,
       thumbnail: this.thumbnail,
+      sizeInBytes: this.sizeInBytes,
       filePath: this.filePath,
       length: audioLength,
       resumeTimeStamp: resumeTimeStamp,
@@ -55,6 +59,7 @@ class AudioModel {
       id: audio.id,
       lastPlayedAt: audio.lastPlayedAt,
       thumbnail: audio.thumbnail,
+      sizeInBytes: audio.sizeInBytes,
       filePath: audio.filePath,
       length: audio.length.inMilliseconds,
       resumeTimeStamp: audio.resumeTimeStamp.inMilliseconds,
@@ -67,6 +72,7 @@ class AudioModel {
       id: json['id'],
       filePath: json['filePath'],
       length: json['length'],
+      sizeInBytes: json['sizeInBytes'],
       resumeTimeStamp: json['resumeTimeStamp'],
       isFavorite: (json['isFavorite'] == 1),
       lastPlayedAt: (json['lastPlayedAt'] == null)
@@ -81,6 +87,7 @@ class AudioModel {
     required DateTime? lastPlayedAt,
     required Uint8List? thumbnail,
     String? filePath,
+    int? sizeInBytes,
     int? length,
     int? resumeTimeStamp,
     bool? isFavorite,
@@ -88,6 +95,7 @@ class AudioModel {
     return AudioModel(
       filePath: filePath ?? this.filePath,
       length: length ?? this.length,
+      sizeInBytes: sizeInBytes ?? this.sizeInBytes,
       resumeTimeStamp: resumeTimeStamp ?? this.resumeTimeStamp,
       isFavorite: isFavorite ?? this.isFavorite,
       id: id,

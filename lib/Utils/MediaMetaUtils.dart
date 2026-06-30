@@ -5,23 +5,26 @@ import 'package:ffmpeg_kit_flutter_new/ffprobe_kit.dart';
 import 'package:ffmpeg_kit_flutter_new/return_code.dart';
 import 'package:ffmpeg_kit_flutter_new/stream_information.dart';
 import 'package:flutter/services.dart';
-import 'package:media_player/DomainModels/Audio.dart';
 import 'package:media_player/DomainModels/AudioInfo.dart';
 import 'package:media_player/DomainModels/VideoInfo.dart';
+import 'package:media_player/Utils/PathUtils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-import 'package:path/path.dart' as p;
 
 class MediaMetaUtils {
+  static Future<int> getMediaSizeInBytes({required String mediaPath}) async {
+    return await File(mediaPath).length();
+  }
+
   static Future<String> changeMediaName({
     required String filePath,
     required String newName,
   }) async {
     if (newName.isEmpty) throw Exception("New name cannot be empty");
 
-    String extension = p.extension(filePath);
-    String path = p.dirname(filePath);
-    String newPath = p.join(path, newName + extension);
+    String extension = PathUtils.getExtension(path: filePath);
+    String path = PathUtils.getDirectoryPath(filePath: filePath);
+    String newPath = PathUtils.join(path1: path, path2: newName + extension);
     await File(filePath).rename(newPath);
     return newPath;
   }

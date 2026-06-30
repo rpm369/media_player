@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:media_player/DataModels/AudioInfoModel.dart';
 import 'package:media_player/DataModels/VideoInfoModel.dart';
-import 'package:media_player/DomainModels/AudioInfo.dart';
+
 import 'package:media_player/DomainModels/Video.dart';
 
 class VideoModel {
@@ -10,6 +10,7 @@ class VideoModel {
   final String filePath;
   final Uint8List? thumbnail;
   final bool isFavorite;
+  final int sizeInBytes;
   final int length;
   final bool hasFinished;
   final int resumeTimeStamp;
@@ -19,6 +20,7 @@ class VideoModel {
     this.id,
     this.lastPlayedAt,
     this.thumbnail,
+    required this.sizeInBytes,
     required this.hasFinished,
     required this.isFavorite,
     required this.filePath,
@@ -32,6 +34,7 @@ class VideoModel {
       'filePath': this.filePath,
       'thumbnail': this.thumbnail,
       'length': this.length,
+      'sizeInBytes': this.sizeInBytes,
       'isFavorite': (this.isFavorite) ? 1 : 0,
       'hasFinished': (this.hasFinished) ? 1 : 0,
       'resumeTimeStamp': this.resumeTimeStamp,
@@ -47,6 +50,7 @@ class VideoModel {
       id: this.id,
       audioInfo: audioInfoModel.toAudioInfo(),
       videoInfo: videoInfoModel.toVideoInfo(),
+      sizeInBytes: this.sizeInBytes,
       lastPlayedAt: this.lastPlayedAt,
       thumbnail: this.thumbnail,
       hasFinished: this.hasFinished,
@@ -60,6 +64,7 @@ class VideoModel {
   factory VideoModel.fromJson({required Map<String, dynamic> json}) {
     return VideoModel(
       id: json['id'],
+      sizeInBytes: json['sizeInBytes'],
       lastPlayedAt: (json['lastPlayedAt'] != null)
           ? DateTime.fromMillisecondsSinceEpoch(json['lastPlayedAt'])
           : null,
@@ -78,6 +83,7 @@ class VideoModel {
 
     return VideoModel(
       id: video.id,
+      sizeInBytes: video.sizeInBytes,
       lastPlayedAt: video.lastPlayedAt,
       thumbnail: video.thumbnail,
       hasFinished: video.hasFinished,
@@ -94,6 +100,7 @@ class VideoModel {
     bool? isFavorite,
     String? filePath,
     bool? hasFinished,
+    int? sizeInBytes,
     required Uint8List? thumbnail,
     int? length,
     int? resumeTimeStamp,
@@ -101,6 +108,7 @@ class VideoModel {
     return VideoModel(
       id: id,
       isFavorite: isFavorite ?? this.isFavorite,
+      sizeInBytes: sizeInBytes ?? this.sizeInBytes,
       lastPlayedAt: lastPlayedAt,
       filePath: filePath ?? this.filePath,
       hasFinished: hasFinished ?? this.hasFinished,

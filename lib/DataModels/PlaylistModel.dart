@@ -1,5 +1,3 @@
-import 'package:media_player/DataModels/AudioModel.dart';
-import 'package:media_player/DataModels/VideoModel.dart';
 import 'package:media_player/DomainModels/Playlist.dart';
 
 class PlaylistModel {

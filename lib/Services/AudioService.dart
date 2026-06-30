@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:media_player/DomainModels/Audio.dart';
 import 'package:media_player/DomainModels/AudioInfo.dart';
 import 'package:media_player/DomainModels/Playlist.dart';
-import 'package:media_player/DomainModels/Video.dart';
 import 'package:media_player/Repos/AudioRepo.dart';
 import 'package:media_player/Utils/FileTypeUtil.dart';
 import 'package:media_player/Utils/MediaMetaUtils.dart';
@@ -32,7 +31,7 @@ class AudioService {
 
     Directory root = Directory('/storage/emulated/0/');
 
-    await for (FileSystemEntity file in root.list()) {
+    await for (FileSystemEntity file in root.list(recursive: true)) {
       if (FileTypeUtil.isAudio(file: file)) audioPathOnDisk.add(file.path);
     }
 
@@ -66,9 +65,11 @@ class AudioService {
     );
     Duration audioLength = await MediaMetaUtils.getMediaLength(path: path);
     AudioInfo audioInfo = await MediaMetaUtils.extractAudioInfo(path: path);
+    int audioSize = await MediaMetaUtils.getMediaSizeInBytes(mediaPath: path);
 
     return Audio(
       thumbnail: albumCover,
+      sizeInBytes: audioSize,
       audioInfo: audioInfo,
       filePath: path,
       length: audioLength,

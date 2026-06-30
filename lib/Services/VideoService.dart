@@ -32,7 +32,7 @@ class VideoService {
 
     Directory root = Directory('/storage/emulated/0/');
 
-    await for (FileSystemEntity file in root.list()) {
+    await for (FileSystemEntity file in root.list(recursive: true)) {
       if (FileTypeUtil.isVideo(file: file)) videoPathOnDisk.add(file.path);
     }
 
@@ -67,8 +67,10 @@ class VideoService {
     VideoInfo videoInfo = await MediaMetaUtils.extractVideoInfo(path: path);
     AudioInfo audioInfo = await MediaMetaUtils.extractAudioInfo(path: path);
     Duration videoLength = await MediaMetaUtils.getMediaLength(path: path);
+    int sizeInBytes = await MediaMetaUtils.getMediaSizeInBytes(mediaPath: path);
 
     return Video(
+      sizeInBytes: sizeInBytes,
       thumbnail: thumbnail,
       audioInfo: audioInfo,
       videoInfo: videoInfo,
