@@ -6,9 +6,9 @@ import 'package:media_player/DomainModels/Playlist.dart';
 import 'package:media_player/DomainModels/Video.dart';
 import 'package:media_player/DomainModels/VideoInfo.dart';
 import 'package:media_player/Repos/VideoRepo.dart';
-import 'package:media_player/Utils/FileTypeUtil.dart';
-import 'package:media_player/Utils/PermissionHandler.dart';
 import 'package:media_player/Utils/MediaMetaUtils.dart';
+import 'package:media_player/Utils/PermissionHandler.dart';
+import 'package:photo_manager/photo_manager.dart';
 
 class VideoService {
   final VideoRepository _repo;
@@ -27,13 +27,25 @@ class VideoService {
 
     Set<String> videoPathOnDisk = {};
 
-    bool isGranted = await PermissionHandler.handleDiskAcessPermissions();
-    if (!isGranted) throw Exception("Disk read permissions are not enabled");
+    bool isGranted = await PermissionHandler.handleDiskAcessPermission();
+    if (!isGranted) throw Exception("Disk access permission is required");
 
-    Directory root = Directory('/storage/emulated/0/');
+    List<AssetPathEntity> pathList = await PhotoManager.getAssetPathList(
+      type: RequestType.video,
+    );
 
-    await for (FileSystemEntity file in root.list(recursive: true)) {
-      if (FileTypeUtil.isVideo(file: file)) videoPathOnDisk.add(file.path);
+    for (AssetPathEntity folder in pathList) {
+      List<AssetEntity> videos = await folder.getAssetListPaged(
+        page: 0,
+        size: await folder.assetCountAsync,
+      );
+
+      for (AssetEntity video in videos) {
+        final file = await video.file;
+        if (file != null) {
+          videoPathOnDisk.add(file.path);
+        }
+      }
     }
 
     Set<String> videoMetaToBeRemoved = videoPathInDb.difference(
@@ -65,7 +77,17 @@ class VideoService {
       path: path,
     );
     VideoInfo videoInfo = await MediaMetaUtils.extractVideoInfo(path: path);
-    AudioInfo audioInfo = await MediaMetaUtils.extractAudioInfo(path: path);
+    AudioInfo? audioInfo;
+
+    audioInfo = await MediaMetaUtils.extractAudioInfo(path: path);
+    audioInfo ??= AudioInfo(
+      bitRate: 100,
+      codec: "Nothing",
+      language: "English",
+      channelCount: 2,
+      sampleRate: 200,
+    );
+
     Duration videoLength = await MediaMetaUtils.getMediaLength(path: path);
     int sizeInBytes = await MediaMetaUtils.getMediaSizeInBytes(mediaPath: path);
 
@@ -127,6 +149,16 @@ class VideoService {
 
   Future<void> deleteVideo({required Video video}) async {
     await _repo.deleteVideoMetaById(videoId: video.id!);
+    bool isGranted = await PermissionHandler.handleFileManipulationPermission();
+    if (isGranted) {
+      File selectedFile = File(video.filePath);
+      if (!(await selectedFile.exists()))
+        throw Exception("File does not exist");
+      else
+        await selectedFile.delete();
+    } else {
+      throw Exception("Required File manipulation permissions");
+    }
   }
 
   Future<void> renameVideo({

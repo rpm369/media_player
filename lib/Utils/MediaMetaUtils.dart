@@ -37,7 +37,7 @@ class MediaMetaUtils {
       imageFormat: ImageFormat.PNG,
       maxHeight: 200,
       maxWidth: 200,
-      quality: 90,
+      quality: 100,
     );
     return thumbnail;
   }
@@ -90,7 +90,8 @@ class MediaMetaUtils {
 
     for (final StreamInformation stream in streams) {
       final props = stream.getAllProperties();
-      final type = props?['type'] as String?;
+      // 1. Fixed: 'type' -> 'codec_type'
+      final type = props?['codec_type'] as String?;
 
       if (type == 'video') {
         final width = props?['width'] ?? 0;
@@ -102,7 +103,8 @@ class MediaMetaUtils {
             : 0.0;
 
         return VideoInfo(
-          codec: props?['codec'] as String? ?? '',
+          // 2. Fixed: 'codec' -> 'codec_name'
+          codec: props?['codec_name'] as String? ?? '',
           language: (props?['tags'] as Map?)?['language'] as String? ?? 'und',
           resolution: '${width}x${height}',
           frameRate: fps,
@@ -113,29 +115,35 @@ class MediaMetaUtils {
     throw Exception('No video stream found in: $path');
   }
 
-  static Future<AudioInfo> extractAudioInfo({required String path}) async {
+  static Future<AudioInfo?> extractAudioInfo({required String path}) async {
     final session = await FFprobeKit.getMediaInformation(path);
     final info = await session.getMediaInformation();
     final streams = info?.getStreams() ?? [];
 
     for (final StreamInformation stream in streams) {
       final props = stream.getAllProperties();
-      final type = props?['type'] as String?;
+      // 1. Fixed: 'codec_type'
+      final type = props?['codec_type'] as String?;
 
       if (type == 'audio') {
         return AudioInfo(
-          codec: props?['codec'] as String? ?? '',
+          // 2. Fixed: 'codec_name'
+          codec: props?['codec_name'] as String? ?? '',
           language: (props?['tags'] as Map?)?['language'] as String? ?? 'und',
-          bitRate: int.tryParse(props?['bitrate']?.toString() ?? '') ?? 0,
-          channelCount: props?['channelLayout'] != null
-              ? _parseChannels(props!['channelLayout'] as String)
+          // 3. Fixed: 'bit_rate'
+          bitRate: int.tryParse(props?['bit_rate']?.toString() ?? '') ?? 0,
+          // 4. Fixed: 'channel_layout' (Note: 'channels' is correct as-is)
+          channelCount: props?['channel_layout'] != null
+              ? _parseChannels(props!['channel_layout'] as String)
               : (int.tryParse(props?['channels']?.toString() ?? '') ?? 0),
-          sampleRate: int.tryParse(props?['sampleRate']?.toString() ?? '') ?? 0,
+          // 5. Fixed: 'sample_rate'
+          sampleRate:
+              int.tryParse(props?['sample_rate']?.toString() ?? '') ?? 0,
         );
       }
     }
 
-    throw Exception('No audio stream found in: $path');
+    return null;
   }
 
   static int _parseChannels(String layout) {

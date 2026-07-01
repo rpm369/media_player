@@ -5,9 +5,9 @@ import 'package:media_player/DomainModels/Audio.dart';
 import 'package:media_player/DomainModels/AudioInfo.dart';
 import 'package:media_player/DomainModels/Playlist.dart';
 import 'package:media_player/Repos/AudioRepo.dart';
-import 'package:media_player/Utils/FileTypeUtil.dart';
 import 'package:media_player/Utils/MediaMetaUtils.dart';
 import 'package:media_player/Utils/PermissionHandler.dart';
+import 'package:photo_manager/photo_manager.dart';
 
 class AudioService {
   AudioRepository _repo;
@@ -26,13 +26,25 @@ class AudioService {
 
     Set<String> audioPathOnDisk = {};
 
-    bool isGranted = await PermissionHandler.handleDiskAcessPermissions();
-    if (!isGranted) throw Exception("Disk read permissions are not enabled");
+    PermissionState ps = await PhotoManager.requestPermissionExtend();
+    if (!ps.isAuth) throw Exception("Storage permission is denied");
 
-    Directory root = Directory('/storage/emulated/0/');
+    List<AssetPathEntity> pathList = await PhotoManager.getAssetPathList(
+      type: RequestType.audio,
+    );
 
-    await for (FileSystemEntity file in root.list(recursive: true)) {
-      if (FileTypeUtil.isAudio(file: file)) audioPathOnDisk.add(file.path);
+    for (AssetPathEntity folder in pathList) {
+      List<AssetEntity> audios = await folder.getAssetListPaged(
+        page: 0,
+        size: await folder.assetCountAsync,
+      );
+
+      for (AssetEntity audio in audios) {
+        final file = await audio.file;
+        if (file != null) {
+          audioPathOnDisk.add(file.path);
+        }
+      }
     }
 
     Set<String> audioMetaToBeRemoved = audioPathInDb.difference(
@@ -64,7 +76,15 @@ class AudioService {
       path: path,
     );
     Duration audioLength = await MediaMetaUtils.getMediaLength(path: path);
-    AudioInfo audioInfo = await MediaMetaUtils.extractAudioInfo(path: path);
+    AudioInfo? audioInfo;
+    audioInfo = await MediaMetaUtils.extractAudioInfo(path: path);
+    audioInfo ??= AudioInfo(
+      bitRate: 100,
+      codec: "Nothing",
+      language: "English",
+      channelCount: 2,
+      sampleRate: 200,
+    );
     int audioSize = await MediaMetaUtils.getMediaSizeInBytes(mediaPath: path);
 
     return Audio(
@@ -100,6 +120,16 @@ class AudioService {
 
   Future<void> deleteAudio({required Audio audio}) async {
     await _repo.deleteAudioMetaById(id: audio.id!);
+    bool isGranted = await PermissionHandler.handleFileManipulationPermission();
+    if (isGranted) {
+      File selectedFile = File(audio.filePath);
+      if (!(await selectedFile.exists()))
+        throw Exception("File does not exist");
+      else
+        await selectedFile.delete();
+    } else {
+      throw Exception("Required File manipulation Permission");
+    }
   }
 
   Future<void> renameAudio({

@@ -16,6 +16,10 @@ class PlaylistService {
     required this._videoService,
   });
 
+  Future<int> createPlaylist({required Playlist playlist}) async {
+    return await _repo.createPlaylist(playlist: playlist);
+  }
+
   Future<List<Playlist>> getAllPlaylists() async {
     List<Playlist> allEmptyPlaylist = await _repo.getAllPlaylist();
     List<Playlist> allFilledPlaylist = [];
